@@ -13,6 +13,8 @@ console.log(`[recording process] BUCKET_NAME: ${BUCKET_NAME}`);
 const BROWSER_SCREEN_WIDTH = args[1];
 const BROWSER_SCREEN_HEIGHT = args[2];
 console.log(`[recording process] BROWSER_SCREEN_WIDTH: ${BROWSER_SCREEN_WIDTH}, BROWSER_SCREEN_HEIGHT: ${BROWSER_SCREEN_HEIGHT}`);
+const BUCKET_FILE_PATH = args[3];
+console.log(`[recording process] BUCKET_FILE_PATH: ${BUCKET_FILE_PATH}`);
 
 const VIDEO_BITRATE = 3000;
 const VIDEO_FRAMERATE = 30;
@@ -67,14 +69,7 @@ transcodeStreamToOutput.stderr.on('data', data => {
     console.log(`[transcodeStreamToOutput process] stderr: ${(new Date()).toISOString()} ffmpeg: ${data}`);
 });
 
-const timestamp = new Date();
-const fileTimestamp = timestamp.toISOString().substring(0,19);
-const year = timestamp.getFullYear();
-const month = timestamp.getMonth() + 1;
-const day = timestamp.getDate();
-const hour = timestamp.getUTCHours();
-const fileName = `${year}/${month}/${day}/${hour}/${fileTimestamp}.mp4`;
-new S3Uploader(BUCKET_NAME, fileName).uploadStream(transcodeStreamToOutput.stdout);
+new S3Uploader(BUCKET_NAME, BUCKET_FILE_PATH).uploadStream(transcodeStreamToOutput.stdout);
 
 // event handler for docker stop, not exit until upload completes
 process.on('SIGTERM', (code, signal) => {
